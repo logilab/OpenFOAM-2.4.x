@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+else
+    NUMJOBS = 1
+endif
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	mkdir -p openfoam240
+	cp -al Allwmake applications bin COPYING doc etc README.html README.org src tutorials wmake openfoam240
+	rm -f openfoam240/etc/bashrc
+	sed 's,^foamInstall=.*,foamInstall=/opt,;s,^export WM_PROJECT_DIR.*,export WM_PROJECT_DIR=$$WM_PROJECT_INST_DIR/openfoam240,' < etc/bashrc > openfoam240/etc/bashrc
+	MAKEFLAGS=-j$(NUMJOBS); FOAM_INST_DIR=$(CURDIR); cd openfoam240 && . etc/bashrc && wmake all
+
+
+override_dh_auto_install:
+	install -d debian/openfoam/opt/
+	cp -al openfoam240 debian/openfoam/opt/
+	find debian/openfoam/opt/openfoam240 -path '*Make/linux64GccDPOpt' -print0 | xargs -0 rm -rf
+
+override_dh_auto_clean:
+	rm -rf openfoam240

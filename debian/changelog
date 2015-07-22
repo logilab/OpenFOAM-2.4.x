@@ -1,0 +1,5 @@
+openfoam (2.4.0-1) UNRELEASED; urgency=medium
+
+  * Initial release.
+
+ -- Julien Cristau <julien.cristau@logilab.fr>  Wed, 22 Jul 2015 14:03:17 +0200
